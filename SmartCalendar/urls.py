@@ -24,5 +24,6 @@ router.register(r'calendar', views.CalendarViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls))
+    path('api/', include(router.urls)),
+    path('', include('app.urls'))
 ]

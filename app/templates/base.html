@@ -1,0 +1,25 @@
+{% load static %}
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="{% static "bootstrap/dist/css/bootstrap.css" %}">
+  <link rel="stylesheet" type="text/css" href="{% static "css/main.css" %}">
+  {% block css %}
+  {% endblock %}
+  <title>{% block title %}{% endblock %}</title>
+</head>
+
+<body>
+  <div class="container">
+    {% block content %}
+    <p>I am base.html content</p>
+    {% endblock %}
+  </div>
+  <script src="{% static "bootstrap/dist/js/bootstrap.js" %}"></script>
+  <script src="{% static "angular/angular.js" %}"></script>
+  <script src="{% static "angular-resource/angular-resource.js" %}"></script>
+  <script src="{% static "underscore/underscore.js" %}"></script>
+  {% block js %}
+  <script src="{% static "js/main.js" %}"></script>
+  {% endblock %}
+</body>
+</html>
