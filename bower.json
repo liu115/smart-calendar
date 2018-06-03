@@ -1,0 +1,19 @@
+{
+  "name": "calendar",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "dependencies": {
+    "angular": "1.2.13",
+    "angular-resource": "1.2.13",
+    "underscore": "",
+    "bootstrap": ">=3.0"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
