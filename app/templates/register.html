@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %} Register {% endblock %}
+
+{% block content %}
+  {% if name and password %}
+    <p>{{ name }}</p>
+    <p>{{ password }}</p>
+  {% endif %}
+  <form action="{% url 'register' %}" method="POST">
+    {% csrf_token %}
+    <label name="name">Name: </label>
+    <input type="text" name="name" />
+    <label name="password">Password: </label>
+    <input type="password" name="password" />
+    <input type="submit" />
+  </form>
+{% endblock %}

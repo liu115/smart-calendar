@@ -8,3 +8,11 @@ class Calendar(models.Model):
 
     class Meta:
         db_table = 'calendar'
+
+class User(models.Model):
+    name = models.TextField()
+    password = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'users'
