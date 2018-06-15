@@ -56,7 +56,7 @@ ROOT_URLCONF = 'SmartCalendar.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -125,3 +125,5 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "app/static"),
     os.path.join(BASE_DIR, "bower_components"),
 ]
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
