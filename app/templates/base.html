@@ -1,6 +1,7 @@
 {% load static %}
 <html>
 <head>
+  <meta charset="utf-8">
   <link rel="stylesheet" type="text/css" href="{% static "bootstrap/dist/css/bootstrap.css" %}">
   <link rel="stylesheet" type="text/css" href="{% static "css/main.css" %}">
   {% block css %}
@@ -10,6 +11,18 @@
 
 <body>
   <div class="container">
+    {% comment %} This is for debugging {% endcomment %}
+    {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+      <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>
+        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %} {{ message }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% comment %} End {% endcomment %}
+    
     {% block content %}
     <p>I am base.html content</p>
     {% endblock %}

@@ -1,18 +1,41 @@
 from django.db import models
 
-# Create your models here.
-class Calendar(models.Model):
-    comment = models.TextField()
+class Event(models.Model):
+    '''
+    Save the event for calendar usage
+    '''
+    title = models.CharField(max_length=50)
+    comment = models.TextField(max_length=100)
+    starttime = models.DateTimeField()
+    duration = models.DurationField()
+    user_id = models.UUIDField()
+
     last_modify_date = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'calendar'
+        db_table = 'events'
 
-class User(models.Model):
-    name = models.TextField()
-    password = models.TextField()
-    created = models.DateTimeField(auto_now_add=True)
+class Group(models.Model):
+    '''
+    Group is a invite link between starter and target.
+    
+    is_pending: wait for target accept
+    is_success: True if the target accept
+    
+    if is_pending == False and is_success == False,
+    the grouping invitation is canceled
+    '''
+
+    group_id = models.UUIDField()
+    starter_id = models.UUIDField()
+    starter_name = models.CharField(max_length=50)
+    target_id = models.UUIDField()
+    target_name = models.CharField(max_length=50)
+    
+    is_pending = models.BooleanField()
+    is_success = models.BooleanField()
 
     class Meta:
-        db_table = 'users'
+        db_table = 'groups'
+

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %} Calendar {% endblock %}
+
+{% block content %}
+  <h1></h1>
+  {% if events %}
+    <ul>
+    {% for event in events %}
+      <li>
+        <p>{{ event }}</p>
+      </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  <p><a href="">add event</a></p>
+  <form action="{% url 'add_event' %}" method="POST">
+  {% comment %} <form action="" method="POST"> {% endcomment %}
+    {% csrf_token %}
+    <label for="title">Title: </label>
+    <input type="text" name="title" />
+    <label for="starttime">Time: </label>
+    <input type="datetime-local" name="starttime" />
+    <label for="duration">Duration: </label>
+    <input type="number" name="duration" min="0" />
+    <label for="comment">Comment: </label>
+    <textarea name="comment" ></textarea>
+    <input type="submit" />
+  </form>
+  <p><a href="{% url 'index' %}">back home</a></p>
+{% endblock %}
