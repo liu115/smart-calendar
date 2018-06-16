@@ -28,7 +28,7 @@ class Group(models.Model):
     '''
 
     group_id = models.PositiveIntegerField()
-    starter_id = models.UUIDField()
+    starter_id = models.PositiveIntegerField()
     starter_name = models.CharField(max_length=50)
     target_id = models.PositiveIntegerField()
     target_name = models.CharField(max_length=50)
