@@ -8,7 +8,7 @@ class Event(models.Model):
     comment = models.TextField(max_length=100)
     starttime = models.DateTimeField()
     duration = models.DurationField()
-    owner_user_id = models.UUIDField()
+    owner_user_id = models.PositiveIntegerField()
 
     last_modify_date = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -27,10 +27,10 @@ class Group(models.Model):
     the grouping invitation is canceled
     '''
 
-    group_id = models.UUIDField()
+    group_id = models.PositiveIntegerField()
     starter_id = models.UUIDField()
     starter_name = models.CharField(max_length=50)
-    target_id = models.UUIDField()
+    target_id = models.PositiveIntegerField()
     target_name = models.CharField(max_length=50)
     
     is_pending = models.BooleanField()
