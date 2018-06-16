@@ -37,10 +37,11 @@ def invite(request):
         return HttpResponseRedirect(reverse_lazy('index'))
 
     try:
-        target_user_model = User.objects.get(username=target_user)
+        target_user_instance = User.objects.get(username=target_user)
         messages.add_message(request, messages.INFO, 'Invitation was sent')
     except:
         messages.add_message(request, messages.WARNING, 'target user not exists!')
+        return HttpResponseRedirect(reverse_lazy('index'))
     
     # TODO: Send grouping invitation to target user
     # TODO: Add multiple invite target at once

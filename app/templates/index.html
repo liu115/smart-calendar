@@ -7,7 +7,7 @@
   {% if request.user.is_authenticated %}
     <p>使用者: {{request.user}}</p>
     <p><a href="">一個群組邀請</a></p>
-    <form method="POST" action="/invite">
+    <form method="POST" action="{% url 'invite' %}">
       {% csrf_token %}
       <label for="invite_user">Invite User: </label>
       <input type="text" name="invite_user" />

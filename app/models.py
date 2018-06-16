@@ -8,7 +8,7 @@ class Event(models.Model):
     comment = models.TextField(max_length=100)
     starttime = models.DateTimeField()
     duration = models.DurationField()
-    user_id = models.UUIDField()
+    owner_user_id = models.UUIDField()
 
     last_modify_date = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -19,7 +19,7 @@ class Event(models.Model):
 class Group(models.Model):
     '''
     Group is a invite link between starter and target.
-    
+
     is_pending: wait for target accept
     is_success: True if the target accept
     
