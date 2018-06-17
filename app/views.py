@@ -134,6 +134,39 @@ def group_result(request):
     # TODO: Calculate first and save in DB?
     pass
 
+def events(request):
+    '''
+    API to show all events for the user
+    '''
+
+    # TODO: check user auth
+    pass
+def add_event(request):
+    '''
+    API to add a new event for the user from POST
+    '''
+    # TODO: check user auth
+    # TODO: read data from POST
+    pass
+
+def update_event(request):
+    '''
+    API to update an event for the user from POST
+    '''
+    # TODO: check user auth
+    # TODO: check the user own the event
+    # TODO: read data from POST
+    pass
+    
+def del_event(request, id):
+    '''
+    API to del event id=id using GET
+    '''
+    # TODO: check user auth
+    # TODO: check the user own the event
+    # TODO: refer my function accept_group
+    pass 
+
 def calendar(request):
     '''
     Show users calendars
@@ -151,41 +184,6 @@ def calendar(request):
     ]
     return render(request, 'calendar.html', locals())
 
-@require_POST
-def add_event(request):
-    '''
-    Add new event
-    '''
-    if not request.user.is_authenticated:
-        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
-    
-    # TODO: extract all the data from POST with clean()
-
-    messages.add_message(request, messages.INFO, 'Add new event')
-    
-    # TODO: Add the event to DB
-    return HttpResponseRedirect(reverse_lazy('calendar'))
-
-@require_POST
-def update_event(request):
-    '''
-    Update an event
-    '''
-    if not request.user.is_authenticated:
-        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
-
-    # TODO: MUST check the event is belongs to the user
-    return HttpResponseRedirect(reverse_lazy('calendar'))
-
-@require_POST
-def del_event(request):
-    '''
-    Del new event
-    '''
-    if not request.user.is_authenticated:
-        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
-    # TODO: MUST check the event is belongs to the user
-    return HttpResponseRedirect(reverse_lazy('calendar'))
 
 class CalendarViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
