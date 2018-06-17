@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from app.models import Event
+from app.models import Event,Group
 from app.serializers import CalendarSerializer
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -38,12 +38,16 @@ def invite(request):
 
     try:
         target_user_instance = User.objects.get(username=target_user)
+        r1=Group.objects.create(group_id=request.user.id,starter_id=request.user.id,starter_name=request.user.username,target_id=target_user_instance.id,target_name=target_user,is_pending=True,is_success=False )
+        r1.save()
         messages.add_message(request, messages.INFO, 'Invitation was sent')
+        
     except:
         messages.add_message(request, messages.WARNING, 'target user not exists!')
         return HttpResponseRedirect(reverse_lazy('index'))
+
+
     
-    # TODO: Send grouping invitation to target user
     # TODO: Add multiple invite target at once
     return HttpResponseRedirect(reverse_lazy('index'))
 
@@ -54,14 +58,14 @@ def calendar(request):
     if not request.user.is_authenticated:
         messages.add_message(request, messages.ERROR, 'You are no authenticated!')
     print(request.user.username, request.user.id)
-    # TODO: read data from db and render
 
-    # Fake data
-    import time
-    events = [
-        { 'title': 'group meeting', 'starttime': time.asctime(time.localtime()), 'duration': 20 },
-        { 'title': 'ML class', 'starttime': time.asctime(time.localtime(time.time() + 1000000)), 'duration': 300 }
-    ]
+
+    events_objects = Event.objects.filter(owner_user_id= request.user.id)
+    events=[]
+    for ob in events_objects :
+        event = [ob.title,ob.starttime,ob.duration,ob.comment] 
+        events.append(event)
+
     return render(request, 'calendar.html', locals())
 
 @require_POST
@@ -73,11 +77,25 @@ def add_event(request):
         messages.add_message(request, messages.ERROR, 'You are no authenticated!')
     
     # TODO: extract all the data from POST with clean()
-
-    messages.add_message(request, messages.INFO, 'Add new event')
     
+    import datetime
+    
+    try:
+        title = request.POST.get('title','')
+        starttime = request.POST.get('starttime','1911-01-01')
+
+        duration = datetime.timedelta(int(request.POST.get('duration')))
+        comment= request.POST.get('comment','')
+
+        e1= Event.objects.create(owner_user_id=request.user.id,title=title,starttime=starttime,duration=duration,comment=comment)
+        e1.save()
+        messages.add_message(request, messages.INFO, 'Add new event')
+
+    except:
+        messages.add_message(request, messages.ERROR, '填表內容有誤')
     # TODO: Add the event to DB
     return HttpResponseRedirect(reverse_lazy('calendar'))
+
 
 @require_POST
 def update_event(request):
