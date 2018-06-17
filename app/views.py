@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from app.models import Event,Group
+from app.models import Event, Group
 from app.serializers import CalendarSerializer
 
 from django.http import HttpResponse, HttpResponseRedirect
@@ -12,7 +12,7 @@ from django.views import generic
 
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-
+import json
 
 def index(request):
     '''
@@ -51,6 +51,126 @@ def invite(request):
     # TODO: Add multiple invite target at once
     return HttpResponseRedirect(reverse_lazy('index'))
 
+
+def query_group(request):
+    '''
+    Used for AJAX
+    Query for notification
+    Including recieved group and accepted group
+    '''
+    res_data = {}
+    if not request.user.is_authenticated:
+        res_data = { 
+            'ok': False,
+            'message': 'You are no authenticated!',
+        }
+        return HttpResponse(json.dumps(res_data), content_type="application/json")
+
+    # Query recieved group invitaions
+    recieved_groups = Group.objects.all().filter(
+        target_id=request.user.id)
+
+    # Query accepted group invitaoins (start by user)
+    sent_groups = Group.objects.all().filter(
+        starter_id=request.user.id)
+
+    res_data['ok'] = True
+    res_data['recieved'] = [g.as_dict() for g in recieved_groups]
+    res_data['sent'] = [g.as_dict() for g in sent_groups]
+    return HttpResponse(json.dumps(res_data), content_type="application/json")
+
+def accept_group(request, pid):
+    '''
+    Used for AJAX
+    Accept received (pending) group
+
+    Find the group from db and change
+        pending: 1 -> 0
+        success: 0 -> 1
+    '''
+    res_data = {}
+    if not request.user.is_authenticated:
+        res_data = {
+            'ok': False,
+            'message': 'You are no authenticated!',
+        }
+        return HttpResponse(json.dumps(res_data), content_type="application/json")
+    
+    # group_pid = request.POST.get('id', '')
+
+    # # Check there is a group id
+    # if group_pid == '':
+    #     res_data = res_data = { 'ok': False, 'message': 'No id is sent' }
+    #     return HttpResponse(json.dumps(res_data), content_type="application/json")
+    
+    try:
+        group_instance = Group.objects.get(id=pid)
+    except:
+        res_data = res_data = { 'ok': False, 'message': 'Group does not exsit' }
+        return HttpResponse(json.dumps(res_data), content_type="application/json")
+
+    # Verify the group id is own by request.user
+    if group_instance.target_id != request.user.id:
+        res_data = res_data = { 'ok': False, 'message': 'Not target user'}
+        return HttpResponse(json.dumps(res_data), content_type="application/json")
+
+    # Verify the group is in a valid state
+    if group_instance.is_pending == False or group_instance.is_success == True:
+        res_data = res_data = {'ok': False, 'message': 'The group is not waiting, maybe already accepted'}
+        return HttpResponse(json.dumps(res_data), content_type="application/json")
+
+    # Change the state of group
+    group_instance.is_pending = False
+    group_instance.is_success = True
+    group_instance.save()
+
+    res_data['ok'] = True
+    res_data['data'] = group_instance.as_dict()
+    return HttpResponse(json.dumps(res_data), content_type="application/json")
+
+def group_result(request):
+    '''
+    View of accepted grouping result
+    '''
+
+    # TODO: Calculate the free time in this week and show 
+    # TODO: Show with graph
+    # TODO: Calculate first and save in DB?
+    pass
+
+def events(request):
+    '''
+    API to show all events for the user
+    '''
+
+    # TODO: check user auth
+    pass
+def add_event(request):
+    '''
+    API to add a new event for the user from POST
+    '''
+    # TODO: check user auth
+    # TODO: read data from POST
+    pass
+
+def update_event(request):
+    '''
+    API to update an event for the user from POST
+    '''
+    # TODO: check user auth
+    # TODO: check the user own the event
+    # TODO: read data from POST
+    pass
+    
+def del_event(request, id):
+    '''
+    API to del event id=id using GET
+    '''
+    # TODO: check user auth
+    # TODO: check the user own the event
+    # TODO: refer my function accept_group
+    pass 
+
 def calendar(request):
     '''
     Show users calendars
@@ -58,65 +178,16 @@ def calendar(request):
     if not request.user.is_authenticated:
         messages.add_message(request, messages.ERROR, 'You are no authenticated!')
     print(request.user.username, request.user.id)
+    # TODO: read data from db and render
 
-
-    events_objects = Event.objects.filter(owner_user_id= request.user.id)
-    events=[]
-    for ob in events_objects :
-        event = [ob.title,ob.starttime,ob.duration,ob.comment] 
-        events.append(event)
-
+    # Fake data
+    import time
+    events = [
+        { 'title': 'group meeting', 'starttime': time.asctime(time.localtime()), 'duration': 20 },
+        { 'title': 'ML class', 'starttime': time.asctime(time.localtime(time.time() + 1000000)), 'duration': 300 }
+    ]
     return render(request, 'calendar.html', locals())
 
-@require_POST
-def add_event(request):
-    '''
-    Add new event
-    '''
-    if not request.user.is_authenticated:
-        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
-    
-    # TODO: extract all the data from POST with clean()
-    
-    import datetime
-    
-    try:
-        title = request.POST.get('title','')
-        starttime = request.POST.get('starttime','1911-01-01')
-
-        duration = datetime.timedelta(int(request.POST.get('duration')))
-        comment= request.POST.get('comment','')
-
-        e1= Event.objects.create(owner_user_id=request.user.id,title=title,starttime=starttime,duration=duration,comment=comment)
-        e1.save()
-        messages.add_message(request, messages.INFO, 'Add new event')
-
-    except:
-        messages.add_message(request, messages.ERROR, '填表內容有誤')
-    # TODO: Add the event to DB
-    return HttpResponseRedirect(reverse_lazy('calendar'))
-
-
-@require_POST
-def update_event(request):
-    '''
-    Update an event
-    '''
-    if not request.user.is_authenticated:
-        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
-
-    # TODO: MUST check the event is belongs to the user
-    return HttpResponseRedirect(reverse_lazy('calendar'))
-
-@require_POST
-def del_event(request):
-    '''
-    Del new event
-    '''
-    if not request.user.is_authenticated:
-        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
-    # TODO: MUST check the event is belongs to the user
-    return HttpResponseRedirect(reverse_lazy('calendar'))
 
 class CalendarViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
