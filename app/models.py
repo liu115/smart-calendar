@@ -36,6 +36,21 @@ class Group(models.Model):
     is_pending = models.BooleanField()
     is_success = models.BooleanField()
 
+    last_modify_date = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "group_id": self.group_id,
+            "starter_id": self.starter_id,
+            "starter_name": self.starter_name,
+            "target_id": self.target_id,
+            "target_name": self.target_name,
+            "is_pending": self.is_pending,
+            "is_success": self.is_success,
+            "created": self.created.timestamp(),
+        }
     class Meta:
         db_table = 'groups'
 

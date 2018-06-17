@@ -13,4 +13,6 @@ urlpatterns = [
     path('add_event', views.add_event, name='add_event'),
     path('calendar', views.calendar, name='calendar'),
     path('', views.index, name='index'),
+    path('api/query_group', views.query_group, name='query_group'),
+    path('api/accept_group/<int:pid>', views.accept_group, name='accept_group'),
 ]
