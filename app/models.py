@@ -7,12 +7,21 @@ class Event(models.Model):
     title = models.CharField(max_length=50)
     comment = models.TextField(max_length=100)
     starttime = models.DateTimeField()
-    duration = models.DurationField()
+    endtime = models.DateTimeField()
     owner_user_id = models.PositiveIntegerField()
 
     last_modify_date = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
+    def as_dict(self):
+        return {
+            "title": self.title,
+            "comment": self.comment,
+            "starttime": self.starttime.timestamp(),
+            "endtime": self.endtime.timestamp(),
+            "owner_user_id": self.owner_user_id,
+            "created": self.created.timestamp(),
+        }
     class Meta:
         db_table = 'events'
 
@@ -49,6 +58,7 @@ class Group(models.Model):
             "target_name": self.target_name,
             "is_pending": self.is_pending,
             "is_success": self.is_success,
+            "last_modify_date": self.last_modify_date.timestamp(),
             "created": self.created.timestamp(),
         }
     class Meta:

@@ -142,6 +142,16 @@ def events(request):
     '''
     API to show all events for the user
     '''
+    if not request.user.is_authenticated:
+        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
+    import datetime
+    events_objects = Event.objects.filter(owner_user_id= request.user.id)
+    e1= Event.objects.create(owner_user_id=request.user.id,title='group meeting',starttime='2018-6-20',endtime='2018-6-21')
+    e1.save()
+    res_data={}
+    res_data['data']= [ g.as_dict() for g in events_objects]
+    return HttpResponse(json.dumps(res_data), content_type="application/json")
+
 
     # TODO: check user auth
     pass
