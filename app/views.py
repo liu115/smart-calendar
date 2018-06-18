@@ -128,11 +128,46 @@ def accept_group(request, pid):
     res_data['data'] = group_instance.as_dict()
     return HttpResponse(json.dumps(res_data), content_type="application/json")
 
-def group_result(request):
+def group_result(request,gid):
     '''
     View of accepted grouping result
     '''
+    if not request.user.is_authenticated:
+        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
+    
+    res_data={}
+    
+    try:
+        import datetime
+        g1=Group.objects.get(id=gid)
+        if g1.starter_id != request.user.id and g1.target_id != request.user.id:
+            res_data['ok']=False
+            res_data['messages'] = "Group_{} does not belong to you !!".format(gid)
+        elif g1.starter_id == request.user.id and g1.is_pending == True:
+            res_data['ok']=False
+            res_data['messages'] = "Group_{} does not been accepted !!".format(gid)
 
+        elif g1.target_id == request.user.id and g1.is_pending == True:
+            res_data['ok']=False
+            res_data['messages'] = "You have not accepted the invite!!".format(gid)
+        else:
+            #TODO: get starter's and target's events from db
+            #TODO: compute the two user's same free time
+
+            #fake data
+            times= [
+                [datetime.datetime.now().timestamp(),(datetime.datetime.now()+datetime.timedelta(days=1)).timestamp()]
+            ]
+            res_data['ok']=True
+            for g in times:
+                res_data['time'] =g
+
+    except Group.DoesNotExist:
+        res_data['ok']=False
+        res_data['messages'] = "Group_{} does not exit !!".format(gid) 
+
+    return HttpResponse(json.dumps(res_data), content_type="application/json")
+    
     # TODO: Calculate the free time in this week and show 
     # TODO: Show with graph
     # TODO: Calculate first and save in DB?
@@ -259,11 +294,11 @@ def calendar(request):
     # TODO: read data from db and render
 
     # Fake data
-    import time
-    events = [
-        { 'title': 'group meeting', 'starttime': time.asctime(time.localtime()), 'duration': 20 },
-        { 'title': 'ML class', 'starttime': time.asctime(time.localtime(time.time() + 1000000)), 'duration': 300 }
-    ]
+    #import time
+    #events = [
+    #    { 'title': 'group meeting', 'starttime': time.asctime(time.localtime()), 'duration': 20 },
+    #    { 'title': 'ML class', 'starttime': time.asctime(time.localtime(time.time() + 1000000)), 'duration': 300 }
+    #]
     return render(request, 'calendar.html', locals())
 
 

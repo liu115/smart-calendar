@@ -18,4 +18,5 @@ urlpatterns = [
     path('api/add_event', views.add_event, name='add_event'),
     path('api/update_event', views.update_event, name='update_event'),
     path('api/del_event/<int:id>', views.del_event, name='del_event'),
+    path('api/group_result/<int:gid>', views.group_result, name='group_result'),
 ]
