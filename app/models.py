@@ -15,6 +15,7 @@ class Event(models.Model):
 
     def as_dict(self):
         return {
+            "event_id": self.id,
             "title": self.title,
             "comment": self.comment,
             "starttime": self.starttime.timestamp(),

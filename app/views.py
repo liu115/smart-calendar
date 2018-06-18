@@ -144,12 +144,14 @@ def events(request):
     '''
     if not request.user.is_authenticated:
         messages.add_message(request, messages.ERROR, 'You are no authenticated!')
-    import datetime
+
     events_objects = Event.objects.filter(owner_user_id= request.user.id)
+
+    res_data={}
     e1= Event.objects.create(owner_user_id=request.user.id,title='group meeting',starttime='2018-6-20',endtime='2018-6-21')
     e1.save()
-    res_data={}
-    res_data['data']= [ g.as_dict() for g in events_objects]
+    res_data['data']= [ g.as_dict() for g in events_objects ]
+
     return HttpResponse(json.dumps(res_data), content_type="application/json")
 
 
@@ -159,6 +161,24 @@ def add_event(request):
     '''
     API to add a new event for the user from POST
     '''
+    if not request.user.is_authenticated:
+        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
+    
+    owner_user_id =request.user.id
+    title=request.POST.get('title')
+    starttime=request.POST.get('starttime')
+    endtime=request.POST.get('endtime')
+    comment=request.POST.get('comment','')
+
+    e1= Event.objects.create(owner_user_id=owner_user_id,title=title,starttime=starttime,endtime=endtime,comment=comment)
+    e1.save()
+    
+    res_data={}
+    res_data['ok'] = True
+    res_data['messages'] = 'Add a new events successfully'
+    
+    return HttpResponse(json.dumps(res_data), content_type="application/json")
+
     # TODO: check user auth
     # TODO: read data from POST
     pass
@@ -167,6 +187,37 @@ def update_event(request):
     '''
     API to update an event for the user from POST
     '''
+    if not request.user.is_authenticated:
+        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
+    
+    owner_user_id =request.user.id
+    event_id= request.POST.get('event_id')
+    title=request.POST.get('title')
+    starttime=request.POST.get('starttime')
+    endtime=request.POST.get('endtime')
+    comment=request.POST.get('comment','')
+
+    res_data={}
+    
+    try:
+        e1=Event.objects.get(id = event_id)
+
+        if e1.owner_user_id != owner_user_id :
+            res_data['ok']=False
+            res_data['messages'] = "Event {} does not belong to you !!".format(id) 
+        else :
+            e1.title= title
+            e1.starttime = starttime
+            e1.endtime = endtime
+            e1.comment = comment
+            e1.save()
+            res_data['ok']=True
+            res_data['messages'] = "Event {} has been update".format(id) 
+    except Event.DoesNotExist:
+        res_data['ok']=False
+        res_data['messages'] = "Event {} does not exit !!".format(id) 
+    
+    return HttpResponse(json.dumps(res_data), content_type="application/json")
     # TODO: check user auth
     # TODO: check the user own the event
     # TODO: read data from POST
@@ -176,6 +227,7 @@ def del_event(request, id):
     '''
     API to del event id=id using GET
     '''
+
     # TODO: check user auth
     # TODO: check the user own the event
     # TODO: refer my function accept_group
