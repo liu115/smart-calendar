@@ -148,8 +148,8 @@ def events(request):
     events_objects = Event.objects.filter(owner_user_id= request.user.id)
 
     res_data={}
-    e1= Event.objects.create(owner_user_id=request.user.id,title='group meeting',starttime='2018-6-20',endtime='2018-6-21')
-    e1.save()
+    #e1= Event.objects.create(owner_user_id=request.user.id,title='group meeting',starttime='2018-6-20',endtime='2018-6-21')
+    #e1.save()
     res_data['data']= [ g.as_dict() for g in events_objects ]
 
     return HttpResponse(json.dumps(res_data), content_type="application/json")
@@ -227,11 +227,27 @@ def del_event(request, id):
     '''
     API to del event id=id using GET
     '''
+    if not request.user.is_authenticated:
+        messages.add_message(request, messages.ERROR, 'You are no authenticated!')
 
+    res_data={}
+    try:
+        e1=Event.objects.get(id = id)
+        if e1.owner_user_id != request.user.id:
+            res_data['ok']=False
+            res_data['messages'] = "Event {} does not belong to you !!".format(id) 
+        else:
+            e1.delete()
+            res_data['ok']=True
+            res_data['messages'] = "Event {} has been removed !!".format(id) 
+    except Event.DoesNotExist:
+        res_data['ok']=False
+        res_data['messages'] = "Event {} does not exit !!".format(id) 
     # TODO: check user auth
     # TODO: check the user own the event
     # TODO: refer my function accept_group
-    pass 
+    return HttpResponse(json.dumps(res_data), content_type="application/json")
+
 
 def calendar(request):
     '''
