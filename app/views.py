@@ -153,14 +153,52 @@ def group_result(request,gid):
         else:
             #TODO: get starter's and target's events from db
             #TODO: compute the two user's same free time
+            u1_events=Event.objects.filter(owner_user_id=g1.starter_id,
+                                           starttime__lte=(datetime.datetime.now()+datetime.timedelta(days=7)),
+                                           endtime__gte=datetime.datetime.now())
+            
+            u2_events=Event.objects.filter(owner_user_id=g1.target_id,
+                                           starttime__lte=(datetime.datetime.now()+datetime.timedelta(days=7)),
+                                           endtime__gte=datetime.datetime.now())
+            
+            t =datetime.timedelta(hours=2)
+            basetime=datetime.datetime.now(datetime.timezone.utc)
+            nowtime=basetime
+            freetime=[]
+            while (basetime-nowtime <= datetime.timedelta(hours=168)):
+                free=True
+                if u1_events !=[]:
+                    for event in u1_events:
+                        if((event.starttime < (basetime+t) and event.starttime > basetime)  
+                            or (event.endtime < (basetime+t) and event.endtime > basetime)
+                            or (event.starttime < basetime and event.endtime > basetime+t)):
+                            free=False
+                            break
+                if u2_events != [] and free ==True:
+                    for event in u2_events:
+                        if((event.starttime < (basetime+t) and event.starttime > basetime)  
+                            or (event.endtime < (basetime+t) and event.endtime > basetime)
+                            or (event.starttime < basetime and event.endtime > basetime+t)):
+                            free=False
+                            break
+                if (free ==True):
+                    freetime.append([basetime.timestamp(),(basetime+t).timestamp()])
+                basetime =basetime + t
+            print(len(freetime))
+            
+            if(freetime == []):
+                res_data['ok']=False
+                res_data['messages']='no free time in this week'
+            else:
+                res_data['ok']=True
+                res_data['time'] = freetime
 
-            #fake data
-            times= [
-                [datetime.datetime.now().timestamp(),(datetime.datetime.now()+datetime.timedelta(days=1)).timestamp()]
-            ]
-            res_data['ok']=True
-            for g in times:
-                res_data['time'] =g
+
+
+
+
+
+
 
     except Group.DoesNotExist:
         res_data['ok']=False
