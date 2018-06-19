@@ -1,8 +1,197 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %} Calendar {% endblock %}
 
+{% block css %}
+  <link href="https://unpkg.com/bootstrap@3/dist/css/bootstrap.css" rel="stylesheet">
+  <link href="https://unpkg.com/angular-bootstrap-colorpicker@3/css/colorpicker.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/angular-bootstrap-calendar/dist/css/angular-bootstrap-calendar.min.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
+
+<html ng-app="mwl.calendar.docs">
+  <div ng-controller="KitchenSinkCtrl as vm">
+    <h2 class="text-center"><input ng-model="vm.calendarTitle"></h2>
+  
+    <div class="row">
+  
+      <div class="col-md-6 text-center">
+        <div class="btn-group">
+  
+          <button
+            class="btn btn-primary"
+            mwl-date-modifier
+            date="vm.viewDate"
+            decrement="vm.calendarView"
+            ng-click="vm.cellIsOpen = false">
+            Previous
+          </button>
+          <button
+            class="btn btn-default"
+            mwl-date-modifier
+            date="vm.viewDate"
+            set-to-today
+            ng-click="vm.cellIsOpen = false">
+            Today
+          </button>
+          <button
+            class="btn btn-primary"
+            mwl-date-modifier
+            date="vm.viewDate"
+            increment="vm.calendarView"
+            ng-click="vm.cellIsOpen = false">
+            Next
+          </button>
+        </div>
+      </div>
+  
+      <br class="visible-xs visible-sm">
+  
+      <div class="col-md-6 text-center">
+        <div class="btn-group">
+          <button class="btn btn-primary" ng-model="vm.calendarView" uib-btn-radio="'year'" ng-click="vm.cellIsOpen = false;">Year</button>
+          <button class="btn btn-primary" ng-model="vm.calendarView" uib-btn-radio="'month'" ng-click="vm.cellIsOpen = false;">Month</button>
+          <button class="btn btn-primary" ng-model="vm.calendarView" uib-btn-radio="'week'" ng-click="vm.cellIsOpen = false">Week</button>
+          <button class="btn btn-primary" ng-model="vm.calendarView" uib-btn-radio="'day'" ng-click="vm.cellIsOpen = false;">Day</button>
+        </div>
+      </div>
+  
+    </div>
+    <br>
+    <mwl-calendar
+      events="vm.events"
+      view="vm.calendarView"
+      view-title="vm.calendarTitle"
+      view-date="vm.viewDate"
+      on-event-click="vm.eventClicked(calendarEvent)"
+      on-event-times-changed="vm.eventTimesChanged(calendarEvent); calendarEvent.startsAt = calendarNewEventStart; calendarEvent.endsAt = calendarNewEventEnd"
+      cell-is-open="vm.cellIsOpen"
+      day-view-start="00:00"
+      day-view-end="23:59"
+      day-view-split="30"
+      cell-modifier="vm.modifyCell(calendarCell)"
+      cell-auto-open-disabled="true"
+      on-timespan-click="vm.timespanClicked(calendarDate, calendarCell)">
+    </mwl-calendar>
+  
+    <br><br><br>
+  
+    <h3 id="event-editor">
+      Edit events
+      <button
+        class="btn btn-primary pull-right"
+        ng-click="vm.addEvent('{{csrf_token}}')">
+        Add new
+      </button>
+      <div class="clearfix"></div>
+    </h3>
+  
+    <table class="table table-bordered">
+  
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Primary color</th>
+          <th>Secondary color</th>
+          <th>Starts at</th>
+          <th>Ends at</th>
+          <th>Remove</th>
+          <th>Save</th>
+        </tr>
+      </thead>
+  
+      <tbody>
+        <tr ng-repeat="event in vm.events track by $index">
+          <td>
+            <input
+              type="text"
+              class="form-control"
+              ng-model="event.title">
+          </td>
+          <td>
+            <input class="form-control" colorpicker type="text" ng-model="event.color.primary">
+          </td>
+          <td>
+            <input class="form-control" colorpicker type="text" ng-model="event.color.secondary">
+          </td>
+          <td>
+            <p class="input-group" style="max-width: 250px">
+              <input
+                type="text"
+                class="form-control"
+                readonly
+                uib-datepicker-popup="dd MMMM yyyy"
+                ng-model="event.startsAt"
+                is-open="event.startOpen"
+                close-text="Close" >
+              <span class="input-group-btn">
+                <button
+                  type="button"
+                  class="btn btn-default"
+                  ng-click="vm.toggle($event, 'startOpen', event)">
+                  <i class="glyphicon glyphicon-calendar"></i>
+                </button>
+              </span>
+            </p>
+            <div
+              uib-timepicker
+              ng-model="event.startsAt"
+              hour-step="1"
+              minute-step="1"
+              show-meridian="true">
+            </div>
+          </td>
+          <td>
+            <p class="input-group" style="max-width: 250px">
+              <input
+                type="text"
+                class="form-control"
+                readonly
+                uib-datepicker-popup="dd MMMM yyyy"
+                ng-model="event.endsAt"
+                is-open="event.endOpen"
+                close-text="Close">
+              <span class="input-group-btn">
+                <button
+                  type="button"
+                  class="btn btn-default"
+                  ng-click="vm.toggle($event, 'endOpen', event)">
+                  <i class="glyphicon glyphicon-calendar"></i>
+                </button>
+              </span>
+            </p>
+            <div
+              uib-timepicker
+              ng-model="event.endsAt"
+              hour-step="1"
+              minute-step="1"
+              show-meridian="true">
+            </div>
+          </td>
+          <td>
+            <button
+              class="btn btn-danger"
+              ng-click="vm.delete_data(event); vm.events.splice($index, 1);"
+            >
+              Delete
+            </button>
+          </td>
+          <td>
+              <button
+                class="btn btn-success"
+                ng-click="vm.save_data(event,'{{csrf_token}}')"
+              >
+                Save
+              </button>
+            </td>
+        </tr>
+      </tbody>
+  
+    </table>
+  </div>
+</html>
   <h1></h1>
   {% if events %}
     <ul>
@@ -17,15 +206,28 @@
   <form action="{% url 'add_event' %}" method="POST">
   {% comment %} <form action="" method="POST"> {% endcomment %}
     {% csrf_token %}
+    {{csrf_token}}
     <label for="title">Title: </label>
     <input type="text" name="title" />
     <label for="starttime">Time: </label>
     <input type="datetime-local" name="starttime" />
-    <label for="duration">Duration: </label>
-    <input type="number" name="duration" min="0" />
+    <label for="endtime">Duration: </label>
+    <input type="datetime-local" name="endtime" />
     <label for="comment">Comment: </label>
     <textarea name="comment" ></textarea>
     <input type="submit" />
   </form>
   <p><a href="{% url 'index' %}">back home</a></p>
+{% endblock %}
+
+{% block js %}
+  <script src="https://unpkg.com/moment@2.17.1"></script>
+  <script src="https://unpkg.com/interactjs@1"></script>
+  <script src="https://unpkg.com/angular-animate@1.6.6/angular-animate.js"></script>
+  <script src="https://unpkg.com/angular-ui-bootstrap@2/dist/ui-bootstrap-tpls.js"></script>
+  <script src="https://unpkg.com/rrule@2"></script>
+  <script src="https://unpkg.com/angular-bootstrap-colorpicker@3"></script>
+  <script src="https://unpkg.com/angular-bootstrap-calendar"></script>  
+  <script src="{% static "js/calendar/example.js" %}"></script>
+  <script src="{% static "js/calendar/helper.js" %}"></script>
 {% endblock %}

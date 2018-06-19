@@ -8,6 +8,8 @@ class Event(models.Model):
     comment = models.TextField(max_length=100)
     starttime = models.DateTimeField()
     endtime = models.DateTimeField()
+    p_color = models.TextField(max_length=10)
+    s_color = models.TextField(max_length=10)
     owner_user_id = models.PositiveIntegerField()
 
     last_modify_date = models.DateTimeField(auto_now=True)
@@ -20,6 +22,8 @@ class Event(models.Model):
             "comment": self.comment,
             "starttime": self.starttime.timestamp(),
             "endtime": self.endtime.timestamp(),
+            "p_color": self.p_color,
+            "s_color": self.s_color,
             "owner_user_id": self.owner_user_id,
             "created": self.created.timestamp(),
         }
