@@ -19,4 +19,6 @@ urlpatterns = [
     path('api/update_event', views.update_event, name='update_event'),
     path('api/del_event/<int:id>', views.del_event, name='del_event'),
     path('api/group_result/<int:gid>', views.group_result, name='group_result'),
+    path('api/reject_group/<int:pid>', views.reject_group, name='rejsct_group'),
+
 ]

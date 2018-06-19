@@ -127,6 +127,54 @@ def accept_group(request, pid):
     res_data['ok'] = True
     res_data['data'] = group_instance.as_dict()
     return HttpResponse(json.dumps(res_data), content_type="application/json")
+def reject_group(request, pid):
+    '''
+    Used for AJAX
+    Accept received (pending) group
+
+    Find the group from db and change
+        pending: 1 -> 0
+        success: 0 -> 1
+    '''
+    res_data = {}
+    if not request.user.is_authenticated:
+        res_data = {
+            'ok': False,
+            'message': 'You are no authenticated!',
+        }
+        return HttpResponse(json.dumps(res_data), content_type="application/json")
+    
+    # group_pid = request.POST.get('id', '')
+
+    # # Check there is a group id
+    # if group_pid == '':
+    #     res_data = res_data = { 'ok': False, 'message': 'No id is sent' }
+    #     return HttpResponse(json.dumps(res_data), content_type="application/json")
+    
+    try:
+        group_instance = Group.objects.get(id=pid)
+    except:
+        res_data = res_data = { 'ok': False, 'message': 'Group does not exsit' }
+        return HttpResponse(json.dumps(res_data), content_type="application/json")
+
+    # Verify the group id is own by request.user
+    if group_instance.target_id != request.user.id:
+        res_data = res_data = { 'ok': False, 'message': 'Not target user'}
+        return HttpResponse(json.dumps(res_data), content_type="application/json")
+
+    # Verify the group is in a valid state
+    if group_instance.is_pending == False or group_instance.is_success == True:
+        res_data = res_data = {'ok': False, 'message': 'The group is not waiting, maybe already rejected'}
+        return HttpResponse(json.dumps(res_data), content_type="application/json")
+
+    # Change the state of group
+    group_instance.is_pending = False
+    group_instance.is_success = False
+    group_instance.save()
+
+    res_data['ok'] = True
+    res_data['data'] = group_instance.as_dict()
+    return HttpResponse(json.dumps(res_data), content_type="application/json")
 
 def group_result(request,gid):
     '''
