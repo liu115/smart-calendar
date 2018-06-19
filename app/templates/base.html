@@ -4,12 +4,29 @@
   <meta charset="utf-8">
   <link rel="stylesheet" type="text/css" href="{% static "bootstrap/dist/css/bootstrap.css" %}">
   <link rel="stylesheet" type="text/css" href="{% static "css/main.css" %}">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   {% block css %}
   {% endblock %}
   <title>{% block title %}{% endblock %}</title>
 </head>
 
 <body>
+  <ul class="nav nav-tabs">
+    <li><a href="{% url 'index' %}">Home</a></li>
+    {% if request.user.is_authenticated %}
+    <li><a href="{% url 'calendar' %}">Calendar</a></li>
+    <li><a href="#">Groups</a></li>
+    <li><a href="#">Notifications</a></li>
+    <li><a href="#">Settings</a></li>
+    <li><a href="{% url 'logout' %}">Log out</a></li>
+    {% else %}
+      <li><a href="{% url 'login' %}">Log in</a></li>
+      <li><a href="{% url 'signup' %}">Register</a></li>
+    {% endif %}
+    <li><a href="{% url 'event' %}">api/Events</a></li>
+  </ul>
+
+    
   <div class="container">
     {% comment %} This is for debugging {% endcomment %}
     {% if messages %}
@@ -28,7 +45,7 @@
     {% endblock %}
   </div>
   <script src="{% static "bootstrap/dist/js/bootstrap.js" %}"></script>
-  <script src="{% static "angular/angular.js" %}"></script>
+  <script src="https://unpkg.com/angular@1.6.6/angular.js"></script>
   <script src="{% static "angular-resource/angular-resource.js" %}"></script>
   <script src="{% static "underscore/underscore.js" %}"></script>
   {% block js %}
