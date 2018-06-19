@@ -4,7 +4,7 @@ var abc = 'abcde';
 
 angular
   .module('mwl.calendar.docs') //you will need to declare your module with the dependencies ['mwl.calendar', 'ui.bootstrap', 'ngAnimate']
-  .controller('KitchenSinkCtrl', function(moment, alert, calendarConfig) {
+  .controller('KitchenSinkCtrl', function(moment, alert, calendarConfig,$timeout) {
 
     // 發送 Ajax 查詢請求並處理
   var request = new XMLHttpRequest();
@@ -36,36 +36,65 @@ angular
     vm.title = moment(vm.viewDate).format('YYYY');
     console.log(vm.title);
     vm.viewDate = new Date();
-      vm.events = [
-      // {
-      //   title: 'An event',
-      //   color: {
-      //     primary: "#e3bc08",
-      //     secondary: "#fdf1ba"
-      //   },
-      //   startsAt: new Date(moment.unix(1529452800)),
-      //   endsAt: new Date(moment.unix(1529539200)),
-      //   draggable: false,
-      //   resizable: false
-      // }, {
-      //   title: '<i class="glyphicon glyphicon-asterisk"></i> <span class="text-primary">Another event</span>, with a <i>html</i> title',
-      //   color: calendarConfig.colorTypes.info,
-      //   startsAt: moment().subtract(1, 'day').toDate(),
-      //   endsAt: moment().add(5, 'days').toDate(),
-      //   draggable: false,
-      //   resizable: false
-      // }, {
-      //   title: 'This is a really long event title that occurs on every year',
-      //   color: calendarConfig.colorTypes.important,
-      //   startsAt: moment().startOf('day').add(7, 'hours').toDate(),
-      //   endsAt: moment().startOf('day').add(19, 'hours').toDate(),
-      //   recursOn: 'year',
-      //   draggable: true,
-      //   resizable: true
-      // }
-    ];
+      vm.events = [];
 
     vm.cellIsOpen = true;
+
+    vm.GetGoogleData = function(){
+      gapi.client.calendar.events.list({
+        'calendarId': 'primary',
+        'timeMin': (new Date()).toISOString(),
+        'showDeleted': false,
+        'singleEvents': true,
+        'maxResults': 150,
+        'orderBy': 'startTime'
+      }).then(function(response) {
+        var events = response.result.items;
+
+        //the json that you want kc <3
+        var jsons = {"data":[]}                           
+        if (events.length > 0) {
+          for (i = 0; i < events.length; i++) {
+            var event = events[i];
+            // start time
+            var when_start = event.start.dateTime;
+            if (!when_start) {
+              when_start = event.start.date+'T00:00:00+08:00';
+            }
+            // end time
+            var when_end = event.end.dateTime;
+            if (!when_end) {
+              when_end = event.end.date+'T00:00:00+08:00';
+            }
+            // jsons["data"].push({"title":event.summary,
+            // "starttime":when_start,
+            // "endtime":when_end})
+            new_data = {
+              title: event.summary,
+              startsAt: moment(when_start).toDate(),
+              endsAt: moment(when_end).toDate(),
+              color: calendarConfig.colorTypes.important,
+              draggable: true,
+              resizable: true
+            };
+            console.log(new_data);
+            new_post_data = 
+              '&title='+ event.summary +
+              '&starttime=' + moment(when_start).utc().format('YYYY-MM-DD HH:mm') +
+              '&endtime=' + moment(when_end).utc().format('YYYY-MM-DD HH:mm') +
+              '&p_color=' + new_data.color.primary +
+              '&s_color=' + new_data.color.secondary +
+              '&comment=' + '';
+            vm.events.push(new_data);
+            var request = new XMLHttpRequest();
+            request.open('POST', 'api/add_event');
+            request.setRequestHeader("Content-Type", 'application/x-www-form-urlencoded');
+            request.send(new_post_data);
+          }
+        }
+      });
+    }
+
     vm.addEvent = function(csrf_token) {
       new_data = {
         title: 'New event',
@@ -111,25 +140,27 @@ angular
 
     vm.modifyCell = function(calendarCell){
       if(notpush){
-        for (i in data.data){
-          vm.events.push({
-            event_id : data.data[i].event_id,
-            title: data.data[i].title,
-            startsAt: new Date(moment.unix(data.data[i].starttime)),
-            endsAt: new Date(moment.unix(data.data[i].endtime)),
-            color: {
-              primary: data.data[i].p_color,
-              secondary: data.data[i].s_color
-            },
-            draggable: false,
-            resizable: false
-          });
-          notpush = false;
-          console.log(data);
-          console.log(vm.events)
+          if(data){
+            for (i in data.data){
+              vm.events.push({
+                event_id : data.data[i].event_id,
+                title: data.data[i].title,
+                startsAt: new Date(moment.unix(data.data[i].starttime)),
+                endsAt: new Date(moment.unix(data.data[i].endtime)),
+                color: {
+                  primary: data.data[i].p_color,
+                  secondary: data.data[i].s_color
+                },
+                draggable: false,
+                resizable: false
+              });
+              notpush = false;
+              // console.log(data);
+              // console.log(vm.events)
+              }
+          }
         }
       }
-    }
 
     vm.eventTimesChanged = function(calendarEvent){
       console.log(calendarEvent);
@@ -184,6 +215,9 @@ angular
       request.send(post_data);
       console.log(request);
     }
+    var auto = $timeout(function() {
+      vm.modifyCell();
+    },1000);
   })
   .config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('{[{');

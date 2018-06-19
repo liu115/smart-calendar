@@ -86,6 +86,11 @@
         ng-click="vm.addEvent('{{csrf_token}}')">
         Add new
       </button>
+      <button
+        class="btn btn-primary pull-right"
+        ng-click="vm.GetGoogleData()">
+        Insert Google Data
+      </button> 
       <div class="clearfix"></div>
     </h3>
   
@@ -230,4 +235,38 @@
   <script src="https://unpkg.com/angular-bootstrap-calendar"></script>  
   <script src="{% static "js/calendar/example.js" %}"></script>
   <script src="{% static "js/calendar/helper.js" %}"></script>
+
+  <script type="text/javascript">
+    // Client ID and API key from the Developer Console
+    var CLIENT_ID = '863798907862-r53nmvbn5s5fbpk8js2reih6p2mq664p.apps.googleusercontent.com';
+    var API_KEY = 'AIzaSyA8fGVHgHRVDTv_taKKHEMAeIPDKX7P1Bo';
+    // Array of API discovery doc URLs for APIs used by the quickstart
+    var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+
+    // Authorization scopes required by the API; multiple scopes can be
+    // included, separated by spaces.
+    var SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+    
+    function handleClientLoad() {
+      gapi.load('client:auth2', initClient)
+    } 
+
+    function initClient(){
+      gapi.client.init({
+      apiKey: API_KEY,
+      discoveryDocs: DISCOVERY_DOCS,
+      clientId: CLIENT_ID,
+        scope: SCOPES
+      }).then(function() {
+         gapi.auth2.getAuthInstance().signIn();
+      });
+    }
+
+  </script>
+
+  <script async defer src="https://apis.google.com/js/api.js"
+      onload="this.onload=function(){};handleClientLoad()"
+      onreadystatechange="if (this.readyState === 'complete') this.onload()">
+  </script> 
 {% endblock %}

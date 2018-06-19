@@ -23,10 +23,7 @@ def index(request):
 
 def groups(request):
     return render(request, 'groups.html', locals())
-
-def quickstart(request):
-    return render(request, 'quickstart.html', locals())
-
+    
 @require_POST
 def invite(request):
     '''

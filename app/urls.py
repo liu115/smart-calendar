@@ -21,6 +21,4 @@ urlpatterns = [
     path('api/group_result/<int:gid>', views.group_result, name='group_result'),
     path('api/reject_group/<int:pid>', views.reject_group, name='rejsct_group'),
     path('groups',views.groups,name='groups'),
-    path('quickstart',views.quickstart,name='quickstart')
-
 ]

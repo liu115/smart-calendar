@@ -83,7 +83,7 @@ app.controller('ShowgroupController', function($timeout) {
     };
     var auto = $timeout(function() {
         getdata();
-    },200);
+    },400);
     var auto = $timeout(function() {
         for(i in recieve_time){
             vm.success_recieved[i].grouptime = recieve_time[i];
@@ -91,7 +91,9 @@ app.controller('ShowgroupController', function($timeout) {
         for (i in sent_time){
             vm.success_sent[i].grouptime = sent_time[i];
         }
-    },300);
+        console.log(recieve_time);
+        console.log(sent_time);
+    },1500);
 })
 .config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('{[{');
