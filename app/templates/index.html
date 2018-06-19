@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 
 {% block title %} Smart Calender {% endblock %}
 
@@ -6,15 +8,26 @@
   <h2>Smart Calender!!!</h2>
   {% if request.user.is_authenticated %}
     <p>使用者: {{request.user}}</p>
-    <p><a href="">一個群組邀請</a></p>
+    <div ng-app="GetdataApp">
+      <div  ng-controller="GetdataController as vm">
+        <h4><a href="">{[{vm.recieved.length}]}個群組邀請</a></h4>
+        <ul class="list-group" style="width:50%">
+          <li class="list-group-item" ng-repeat="data in vm.recieved">
+              Invite From {[{data.starter_name}]}
+              <button class="btn btn-xs btn-danger pull-right" ng-click="vm.reject_group(data.id)">Reject</button>
+              <button class="btn btn-xs btn-primary pull-right" ng-click="vm.accept_group(data.id)">Accept</button>
+          </li>
+        </ul>
+      </div>
+    </div>
     <form method="POST" action="{% url 'invite' %}">
       {% csrf_token %}
       <label for="invite_user">Invite User: </label>
       <input type="text" name="invite_user" />
       <input type="submit" />
     </form>
-    <p><a href="{% url 'calendar' %}">my schedule</a></p>
-    <p><a href="{% url 'logout' %}">logout</a></p>
+    <!-- <p><a href="{% url 'calendar' %}">my schedule</a></p>
+    <p><a href="{% url 'logout' %}">logout</a></p> -->
   {% else %}
     <p>您尚未登入喔</p>
     <p><a href="{% url 'login' %}">登入</a>  <a href="{% url 'signup' %}">註冊</a></p>
@@ -22,3 +35,10 @@
 
   {% endif %}
 {% endblock %}
+
+{% block js %}
+  <!-- <script src="{% static "js/index/notification.js" %}"></script> -->
+  <script src="//code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script src="{% static "js/index/notification.js" %}"></script>
+{% endblock %}
+

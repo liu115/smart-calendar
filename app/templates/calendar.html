@@ -13,7 +13,8 @@
 
 <html ng-app="mwl.calendar.docs">
   <div ng-controller="KitchenSinkCtrl as vm">
-    <h2 class="text-center"><input ng-model="vm.calendarTitle"></h2>
+    <!-- <h2 class="text-center"><input ng-model="vm.calendarTitle"></h2> -->
+    <h2 class="text-center">{[{vm.calendarTitle}]}</h2>
   
     <div class="row">
   
@@ -221,7 +222,6 @@
 {% endblock %}
 
 {% block js %}
-  <script src="https://unpkg.com/moment@2.17.1"></script>
   <script src="https://unpkg.com/interactjs@1"></script>
   <script src="https://unpkg.com/angular-animate@1.6.6/angular-animate.js"></script>
   <script src="https://unpkg.com/angular-ui-bootstrap@2/dist/ui-bootstrap-tpls.js"></script>

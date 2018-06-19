@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block title %} Groups {% endblock %}
+
+{% block content %}
+    <div ng-app="ShowgroupApp">
+        <div  ng-controller="ShowgroupController as vm">
+            <h1>Currently in {[{vm.group_num}]} Groups</h1>
+            <ul class="list-group" style="height:100px;width:100%">
+                <li class="list-group-item" ng-repeat="data in vm.success_recieved">
+                    <span style="font-size:15px;" ng-click="showDetails = ! showDetails;">Grouped recieved from {[{data.starter_name}]}，Group ID:{[{data.group_id}]}</span>
+                    <span style="font-size:10px;color:gray">confirm time:{[{data.last_modify_date}]}</span>
+                    <div ng-show="showDetails">
+                        <h4>All Members is free in below time sections</h4>
+                        <div ng-repeat="time in data.grouptime">Start:{[{time[0]}]}，End:{[{time[1]}]}</div>
+                    </div>
+                </li>
+                <li class="list-group-item" ng-repeat="data in vm.success_sent" ng-click="showDetails = ! showDetails">
+                    <span style="font-size:15px;">Grouped sent to {[{data.target_name}]}，Group ID:{[{data.group_id}]}</span>
+                    <span style="font-size:10px;color:gray">confirm time:{[{data.last_modify_date}]}</span>
+                    <div ng-show="showDetails">
+                        <h4>All Members is free in below time sections</h4>
+                        <div ng-repeat="time in data.grouptime">Start:{[{time[0]}]}，End:{[{time[1]}]}</div>
+                    </div>
+                </li>                
+            </ul>
+        </div>
+    </div> 
+    
+
+{% endblock %}
+
+{% block js %}
+  <script src="//code.jquery.com/jquery-2.0.3.min.js"></script>
+  <script src="{% static "js/groups/showgroup.js" %}"></script>
+{% endblock %}

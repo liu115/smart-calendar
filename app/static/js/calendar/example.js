@@ -184,4 +184,8 @@ angular
       request.send(post_data);
       console.log(request);
     }
+  })
+  .config(function($interpolateProvider) {
+    $interpolateProvider.startSymbol('{[{');
+    $interpolateProvider.endSymbol('}]}');
   });
