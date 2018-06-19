@@ -198,14 +198,16 @@ def add_event(request):
     '''
     if not request.user.is_authenticated:
         messages.add_message(request, messages.ERROR, 'You are no authenticated!')
-    
     owner_user_id =request.user.id
+
     title=request.POST.get('title')
     starttime=request.POST.get('starttime')
     endtime=request.POST.get('endtime')
+    p_color = request.POST.get('p_color')
+    s_color = request.POST.get('s_color')
     comment=request.POST.get('comment','')
 
-    e1= Event.objects.create(owner_user_id=owner_user_id,title=title,starttime=starttime,endtime=endtime,comment=comment)
+    e1= Event.objects.create(owner_user_id=owner_user_id,title=title,starttime=starttime,endtime=endtime,p_color=p_color,s_color=s_color,comment=comment)
     e1.save()
     
     res_data={}
@@ -230,8 +232,9 @@ def update_event(request):
     title=request.POST.get('title')
     starttime=request.POST.get('starttime')
     endtime=request.POST.get('endtime')
+    p_color = request.POST.get('p_color')
+    s_color = request.POST.get('s_color')
     comment=request.POST.get('comment','')
-
     res_data={}
     
     try:
@@ -245,6 +248,8 @@ def update_event(request):
             e1.starttime = starttime
             e1.endtime = endtime
             e1.comment = comment
+            e1.p_color = p_color
+            e1.s_color = s_color
             e1.save()
             res_data['ok']=True
             res_data['messages'] = "Event {} has been update".format(id) 
