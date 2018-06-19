@@ -120,12 +120,28 @@ def accept_group(request, pid):
         return HttpResponse(json.dumps(res_data), content_type="application/json")
 
     # Change the state of group
+    freetime=group_result_calculate(group_instance.starter_id,group_instance.target_id)
+    if(freetime  ==[]):
+        res_data['ok'] = True
+        res_data['message']='You two have no same free time'
+
+    else:
+        import datetime
+        res_data['ok'] = True
+        res_data['message']='New event has been add into your calendar!!'
+        print(freetime[0][0])
+        e1= Event.objects.create(owner_user_id=group_instance.starter_id,title='Dating with {}'.format(group_instance.target_id),starttime=datetime.datetime.fromtimestamp(freetime[0][0]),endtime=datetime.datetime.fromtimestamp(freetime[0][1]))
+        e2= Event.objects.create(owner_user_id=group_instance.target_id,title='Dating with {}'.format(group_instance.starter_id),starttime=datetime.datetime.fromtimestamp(freetime[0][0]),endtime=datetime.datetime.fromtimestamp(freetime[0][1]))
+        e1.save()
+        e2.save()
+
     group_instance.is_pending = False
     group_instance.is_success = True
     group_instance.save()
-
-    res_data['ok'] = True
     res_data['data'] = group_instance.as_dict()
+
+
+
     return HttpResponse(json.dumps(res_data), content_type="application/json")
 def reject_group(request, pid):
     '''
@@ -201,38 +217,7 @@ def group_result(request,gid):
         else:
             #TODO: get starter's and target's events from db
             #TODO: compute the two user's same free time
-            u1_events=Event.objects.filter(owner_user_id=g1.starter_id,
-                                           starttime__lte=(datetime.datetime.now()+datetime.timedelta(days=7)),
-                                           endtime__gte=datetime.datetime.now())
-            
-            u2_events=Event.objects.filter(owner_user_id=g1.target_id,
-                                           starttime__lte=(datetime.datetime.now()+datetime.timedelta(days=7)),
-                                           endtime__gte=datetime.datetime.now())
-            
-            t =datetime.timedelta(hours=2)
-            basetime=datetime.datetime.now(datetime.timezone.utc)
-            nowtime=basetime
-            freetime=[]
-            while (basetime-nowtime <= datetime.timedelta(hours=168)):
-                free=True
-                if u1_events !=[]:
-                    for event in u1_events:
-                        if((event.starttime < (basetime+t) and event.starttime > basetime)  
-                            or (event.endtime < (basetime+t) and event.endtime > basetime)
-                            or (event.starttime < basetime and event.endtime > basetime+t)):
-                            free=False
-                            break
-                if u2_events != [] and free ==True:
-                    for event in u2_events:
-                        if((event.starttime < (basetime+t) and event.starttime > basetime)  
-                            or (event.endtime < (basetime+t) and event.endtime > basetime)
-                            or (event.starttime < basetime and event.endtime > basetime+t)):
-                            free=False
-                            break
-                if (free ==True):
-                    freetime.append([basetime.timestamp(),(basetime+t).timestamp()])
-                basetime =basetime + t
-            print(len(freetime))
+            freetime=group_result_calculate(g1.starter_id,g1.target_id)
             
             if(freetime == []):
                 res_data['ok']=False
@@ -240,13 +225,6 @@ def group_result(request,gid):
             else:
                 res_data['ok']=True
                 res_data['time'] = freetime
-
-
-
-
-
-
-
 
     except Group.DoesNotExist:
         res_data['ok']=False
@@ -392,7 +370,6 @@ def calendar(request):
     #]
     return render(request, 'calendar.html', locals())
 
-
 class CalendarViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = CalendarSerializer
@@ -401,3 +378,43 @@ class SignUp(generic.CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('login')
     template_name = 'signup.html'
+
+def group_result_calculate(u1_id,u2_id):
+    import datetime
+    u1_events=Event.objects.filter(owner_user_id=u1_id,
+                                    starttime__lte=(datetime.datetime.now()+datetime.timedelta(days=7)),
+                                    endtime__gte=datetime.datetime.now())
+            
+    u2_events=Event.objects.filter(owner_user_id=u2_id,
+                                    starttime__lte=(datetime.datetime.now()+datetime.timedelta(days=7)),
+                                    endtime__gte=datetime.datetime.now())
+            
+    t =datetime.timedelta(hours=2)
+    basetime=datetime.datetime.now(datetime.timezone.utc)
+    nowtime=basetime
+    freetime=[]
+    while (basetime-nowtime <= datetime.timedelta(hours=168)):
+        free=True
+        if u1_events !=[]:
+            for event in u1_events:
+                if((event.starttime < (basetime+t) and event.starttime > basetime)  
+                    or (event.endtime < (basetime+t) and event.endtime > basetime)
+                    or (event.starttime < basetime and event.endtime > basetime+t)):
+                    free=False
+                    break
+        if u2_events != [] and free ==True:
+            for event in u2_events:
+                if((event.starttime < (basetime+t) and event.starttime > basetime)  
+                    or (event.endtime < (basetime+t) and event.endtime > basetime)
+                    or (event.starttime < basetime and event.endtime > basetime+t)):
+                    free=False
+                    break
+        if (free ==True):
+            freetime.append([basetime.timestamp(),(basetime+t).timestamp()])
+        basetime =basetime + t
+
+    return freetime 
+
+
+
+
