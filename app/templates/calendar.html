@@ -259,8 +259,12 @@
       clientId: CLIENT_ID,
         scope: SCOPES
       }).then(function() {
-         gapi.auth2.getAuthInstance().signIn();
+        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+        updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
       });
+      if(!isSignedIn){
+        gapi.auth2.getAuthInstance().signIn();
+      }
     }
 
   </script>
